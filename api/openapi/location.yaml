@@ -25,6 +25,12 @@ paths:
           application/json:
            schema:
             $ref: '#/components/schemas/CreateLocationResponse'
+       default:
+        description: unexpected errors
+        content:
+          application/json:
+           schema:
+            $ref: '#/components/schemas/ErrorResponse'
   /locations/weathers:
    post:
      summary: Update location weathers
@@ -41,6 +47,13 @@ paths:
           application/json: 
            schema:
             $ref: '#/components/schemas/UpdateLocationWeatherResponse'
+       default:
+        description: unexpected error response
+        content:
+          application/json:
+           schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
    Location:
@@ -118,6 +131,18 @@ components:
           numUpdated:
            type: integer
            default: 0
+   ErrorResponse:
+    type: object
+    properties:
+      httpCode:
+       type: integer
+       description: http status error code
+      errorCode:
+       type: string
+       description: error code
+      errorMessage:
+       type: string
+       description: error message
   
 
    

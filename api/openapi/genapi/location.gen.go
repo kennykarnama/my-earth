@@ -30,6 +30,18 @@ type CreateLocationResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// ErrorResponse defines model for ErrorResponse.
+type ErrorResponse struct {
+	// ErrorCode error code
+	ErrorCode *string `json:"errorCode,omitempty"`
+
+	// ErrorMessage error message
+	ErrorMessage *string `json:"errorMessage,omitempty"`
+
+	// HttpCode http status error code
+	HttpCode *int `json:"httpCode,omitempty"`
+}
+
 // Location defines model for Location.
 type Location struct {
 	// ID ID of location

@@ -1,4 +1,13 @@
 services:
+  my-earth:
+   image: earth-server:latest
+   deploy:
+     resources:
+       limits:
+         memory: 125M
+   env_file: ./envs/earth.env
+   ports:
+     - "8080:8080"
   postgres:
     image: postgres:12.19
     deploy:
