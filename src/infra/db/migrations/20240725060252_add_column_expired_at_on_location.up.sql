@@ -1,0 +1,1 @@
+ALTER TABLE my_earth.location ADD COLUMN expired_at TIMESTAMPTZ;

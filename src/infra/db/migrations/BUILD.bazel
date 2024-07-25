@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "migrations_lib",
+    srcs = ["migrate.go"],
+    embedsrcs = [
+        "20240725004456_create_schemas.down.sql",
+        "20240725004456_create_schemas.up.sql",
+        "20240725004653_create_tables.down.sql",
+        "20240725004653_create_tables.up.sql",
+        "20240725060252_add_column_expired_at_on_location.down.sql",
+        "20240725060252_add_column_expired_at_on_location.up.sql",
+        "20240725062627_add_col_temperature_unit_on_loc.down.sql",
+        "20240725062627_add_col_temperature_unit_on_loc.up.sql",
+    ],
+    importpath = "github.com/kennykarnama/my-earth/src/infra/db/migrations",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_golang_migrate_migrate_v4//:migrate",
+        "@com_github_golang_migrate_migrate_v4//database/postgres",
+        "@com_github_golang_migrate_migrate_v4//source/iofs",
+        "@com_github_kelseyhightower_envconfig//:envconfig",
+    ],
+)
+
+go_binary(
+    name = "migrations",
+    embed = [":migrations_lib"],
+    visibility = ["//visibility:public"],
+)

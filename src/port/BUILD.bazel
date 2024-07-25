@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "port",
+    srcs = ["http.go"],
+    importpath = "github.com/kennykarnama/my-earth/src/port",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//api/openapi/genapi",
+        "//src/app",
+        "//src/pkg/ptr",
+        "@com_github_gin_gonic_gin//:gin",
+    ],
+)

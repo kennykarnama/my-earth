@@ -1,0 +1,124 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: My Earth
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080
+paths:
+  /locations:
+   post:
+     summary: Create a new location
+     operationId: createLocation
+     tags:
+       - createLocation
+     requestBody:
+       content:
+         application/json:
+          schema:
+           $ref: '#/components/schemas/CreateLocationRequest'
+     responses:
+       '201':
+        description: Location successfully created
+        content:
+          application/json:
+           schema:
+            $ref: '#/components/schemas/CreateLocationResponse'
+  /locations/weathers:
+   post:
+     summary: Update location weathers
+     operationId: updateLocationWeather
+     tags:
+       - updateLocationWeather
+     requestBody:
+       content:
+         application/json: {}
+     responses:
+       '200':
+        description: Location weather updated
+        content:
+          application/json: 
+           schema:
+            $ref: '#/components/schemas/UpdateLocationWeatherResponse'
+components:
+  schemas:
+   Location:
+    type: object
+    properties:
+      ID:
+       type: integer
+       description: ID of location
+      city:
+       type: string
+       description: location name
+      latitude:
+       type: number
+       format: double
+       description: latitude of the location
+      longitude: 
+       type: number
+       format: double
+       description: longitude of the location
+      weather_summary:
+       type: string
+       description: weather summary
+      temperature:
+       type: number
+       format: float
+       description: temperatur of the location
+      wind_speed:
+       type: number
+       format: float
+       description: speed of wind in the location
+      wind_angle:
+       type: number
+       format: float
+       description: angle of wind
+      wind_direction:
+       type: string
+       description: direction of wind
+   CreateLocationRequest:
+    type: object
+    properties:
+      name:
+       type: string
+       description: location name
+      latitude:
+       type: number
+       format: double
+       description: latitude of the location
+      longitude:
+       type: number
+       format: double
+       description: longitude of the location
+   CreateLocationResponse:
+    type: object
+    properties:
+      status:
+       type: string
+       description: status of location creation
+      message:
+       type: string
+       description: message of this operation
+      data:
+        $ref: '#/components/schemas/Location'
+   UpdateLocationWeatherResponse:
+    type: object
+    properties:
+      status:
+       type: string
+       description: status of location creation
+      message:
+       type: string
+       description: message of this operation
+      data:
+        type: object
+        properties:
+          numUpdated:
+           type: integer
+           default: 0
+  
+
+   
+   

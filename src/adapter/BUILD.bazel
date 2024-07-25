@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "adapter",
+    srcs = [
+        "location_repo.go",
+        "meteo_source.go",
+    ],
+    importpath = "github.com/kennykarnama/my-earth/src/adapter",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//api/openapi/genapi",
+        "//src/adapter/db",
+        "//src/domain",
+        "//src/pkg/psql",
+        "//src/pkg/ptr",
+        "@com_github_exaring_otelpgx//:otelpgx",
+        "@com_github_jackc_pgx_v5//:pgx",
+        "@com_github_jackc_pgx_v5//pgxpool",
+        "@com_github_jackc_pgx_v5//tracelog",
+        "@com_github_mcosta74_pgx_slog//:pgx-slog",
+    ],
+)
