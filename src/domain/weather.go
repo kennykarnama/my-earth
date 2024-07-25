@@ -51,3 +51,7 @@ type WeatherByPoint struct {
 type WeatherRepository interface {
 	FindByPoint(ctx context.Context, lat, lon float64) (*WeatherByPoint, error)
 }
+
+type WeatherRefresher interface {
+	Refresh(ctx context.Context, req any) error
+}

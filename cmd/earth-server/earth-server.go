@@ -3,6 +3,12 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kennykarnama/my-earth/api/openapi/genapi"
@@ -15,7 +21,7 @@ import (
 
 func main() {
 	cfg := config.Get()
-	ctx := context.Background()
+	ctx, cancelFunc := context.WithCancel(context.Background())
 
 	locRepo, err := adapter.NewLocationRepo(ctx, cfg.DSN)
 	if err != nil {
@@ -33,6 +39,7 @@ func main() {
 	wp.Start()
 
 	locSvc := app.NewLocationSvc(locRepo, meteoSourceRepo, wp)
+	weatherRefresher := app.NewSimpleWeatherRefresher(ctx, locSvc, 1*time.Second)
 
 	locHandler := port.NewHttpHandler(locSvc)
 
@@ -42,8 +49,41 @@ func main() {
 
 	log.Printf("serving http on port %s", cfg.HTTPPort)
 
-	err = r.Run(cfg.HTTPPort)
-	if err != nil {
-		log.Fatal(err)
+	srv := &http.Server{
+		Addr:    cfg.HTTPPort,
+		Handler: r.Handler(),
 	}
+
+	go func() {
+		// service connections
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	go func() {
+		weatherRefresher.Watch()
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 5 seconds.
+	quit := make(chan os.Signal, 1)
+	// kill (no param) default send syscall.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	slog.Info("Shutdown Server ...")
+
+	cancelFunc()
+
+	ctx2, cancel2 := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel2()
+	if err := srv.Shutdown(ctx2); err != nil {
+		log.Fatal("Server Shutdown:", err)
+	}
+	// catching ctx.Done(). timeout of 5 seconds.
+	<-ctx2.Done()
+	log.Println("Server exiting")
+
 }

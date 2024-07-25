@@ -2,7 +2,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "app",
-    srcs = ["svc.go"],
+    srcs = [
+        "simple_wr.go",
+        "svc.go",
+    ],
     importpath = "github.com/kennykarnama/my-earth/src/app",
     visibility = ["//visibility:public"],
     deps = [
