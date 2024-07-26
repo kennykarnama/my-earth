@@ -1,9 +1,9 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
-go_library(
-    name = "migrations_lib",
-    srcs = ["migrate.go"],
-    embedsrcs = [
+pkg_tar(
+    name = "app_layer",
+    srcs = [
         "20240725004456_create_schemas.down.sql",
         "20240725004456_create_schemas.up.sql",
         "20240725004653_create_tables.down.sql",
@@ -13,18 +13,25 @@ go_library(
         "20240725062627_add_col_temperature_unit_on_loc.down.sql",
         "20240725062627_add_col_temperature_unit_on_loc.up.sql",
     ],
-    importpath = "github.com/kennykarnama/my-earth/src/infra/db/migrations",
-    visibility = ["//visibility:private"],
-    deps = [
-        "@com_github_golang_migrate_migrate_v4//:migrate",
-        "@com_github_golang_migrate_migrate_v4//database/postgres",
-        "@com_github_golang_migrate_migrate_v4//source/iofs",
-        "@com_github_kelseyhightower_envconfig//:envconfig",
-    ],
 )
 
-go_binary(
-    name = "migrations",
-    embed = [":migrations_lib"],
-    visibility = ["//visibility:public"],
+oci_image(
+    name = "earth-migrator-image",
+    base = "@gomigrate_base",
+    entrypoint = [
+        "/migrate",
+        "-verbose",
+        "-path",
+        "./",
+    ],
+    env = {
+        "DSN": "",
+    },
+    tars = [":app_layer"],
+)
+
+oci_tarball(
+    name = "app_tarball",
+    image = ":earth-migrator-image",
+    repo_tags = ["earth-migrator:latest"],
 )

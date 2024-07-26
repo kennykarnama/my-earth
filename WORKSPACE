@@ -36,21 +36,18 @@ oci_register_toolchains(
 load("@rules_oci//oci:pull.bzl", "oci_pull")
 
 oci_pull(
-    name = "distroless_static",
-    digest = "sha256:c3c3d0230d487c0ad3a0d87ad03ee02ea2ff0b3dcce91ca06a1019e07de05f12",
-    # registry = "gcr.io",
-    # repository =  "distroless/static",
-    image = "gcr.io/distroless/static",
+    name = "go_base",
+    image = "index.docker.io/library/golang",
+    digest = "sha256:f2eb989b0b5579b75652b72ee7b3b04cb1736fc254d7efbf3e492d4c9ea7235a",
     platforms = [
         "linux/amd64",
-        "linux/arm64",
     ],
 )
 
 oci_pull(
-    name = "go_base",
-    image = "index.docker.io/library/golang",
-    digest = "sha256:f2eb989b0b5579b75652b72ee7b3b04cb1736fc254d7efbf3e492d4c9ea7235a",
+    name = "gomigrate_base",
+    image = "index.docker.io/migrate/migrate",
+    digest = "sha256:de154de4b7f9d0d751aacb1ec6023f5fc96f874eb88b65d050f761a33376aa4b",
     platforms = [
         "linux/amd64",
     ],

@@ -8,6 +8,26 @@ services:
    env_file: ./envs/earth.env
    ports:
      - "8080:8080"
+   depends_on:
+    migrator:
+        condition: service_completed_successfully
+  migrator:
+   image: earth-migrator:latest
+   deploy:
+     resources:
+       limits:
+         memory: 125M
+   entrypoint: 
+    - /migrate
+    - -verbose
+    - -path
+    - ./
+    - -database
+    - "postgres://postgres:password@host.docker.internal:5432/mvp?sslmode=disable&x-migrations-table=schema_migrations_my_earth"
+    - up
+   depends_on:
+    postgres:
+      condition: service_healthy
   postgres:
     image: postgres:12.19
     deploy:
