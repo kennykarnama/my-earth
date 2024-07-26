@@ -1,5 +1,5 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
 go_library(
@@ -40,4 +40,11 @@ oci_tarball(
     name = "app_tarball",
     image = ":earth-server-image",
     repo_tags = ["earth-server:latest"],
+)
+
+oci_push(
+    name = "push",
+    image = ":earth-server-image",
+    remote_tags = ["latest"],
+    repository = "index.docker.io/kennykarnama/earth-server",
 )
