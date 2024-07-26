@@ -86,7 +86,6 @@ func (l *LocationRepo) SaveLoc(ctx context.Context, loc *domain.Location) error 
 		CreatedAt: psql.TimeToPGTimestampz(loc.CreatedAt),
 		UpdatedAt: psql.TimeToPGTimestampz(loc.CreatedAt),
 	})
-
 	if err != nil {
 		return fmt.Errorf("location.save err: %w", err)
 	}
@@ -100,7 +99,8 @@ func (l *LocationRepo) SaveLoc(ctx context.Context, loc *domain.Location) error 
 
 	return nil
 }
-func (l *LocationRepo) GetLocDetailByID(ctx context.Context, ID int) (*domain.LocationWeather, error) {
+
+func (l *LocationRepo) GetLocDetailByID(ctx context.Context, id int) (*domain.LocationWeather, error) {
 	tx, err := l.pool.Begin(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("location.get failed to begin transaction: %w", err)
@@ -112,7 +112,7 @@ func (l *LocationRepo) GetLocDetailByID(ctx context.Context, ID int) (*domain.Lo
 		}
 	}()
 	ptx := l.q.WithTx(tx)
-	dbLoc, err := ptx.GetLocationByID(ctx, int32(ID))
+	dbLoc, err := ptx.GetLocationByID(ctx, int32(id))
 	if err != nil {
 		return nil, fmt.Errorf("location.get err: %w", err)
 	}
@@ -139,6 +139,7 @@ func (l *LocationRepo) GetLocDetailByID(ctx context.Context, ID int) (*domain.Lo
 
 	return lw, nil
 }
+
 func (l *LocationRepo) UpdateWeather(ctx context.Context, locID int, w *domain.Weather) error {
 	tx, err := l.pool.Begin(ctx)
 	if err != nil {
@@ -174,6 +175,7 @@ func (l *LocationRepo) UpdateWeather(ctx context.Context, locID int, w *domain.W
 
 	return nil
 }
+
 func (l *LocationRepo) GetExpiringWeather(ctx context.Context) ([]domain.LocationWeather, error) {
 	tx, err := l.pool.Begin(ctx)
 	if err != nil {

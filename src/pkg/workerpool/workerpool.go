@@ -30,7 +30,6 @@ func (w *Worker) Start() {
 		for task := range w.taskQueue {
 			slog.Debug("worker executor", slog.Any("workerID", w.ID), slog.Any("taskID", task.ID))
 			result, err := task.Executor()
-
 			if err != nil {
 				slog.Error("worker executor", slog.Any("workerID", w.ID), slog.Any("taskID", task.ID), slog.Any("err", err))
 			}
@@ -58,7 +57,7 @@ func New(numOfWorkers int) *WorkerPool {
 	}
 }
 
-func (wp *WorkerPool) Start() error {
+func (wp *WorkerPool) Start() {
 	for i := 0; i < wp.numOfWorkers; i++ {
 		w := &Worker{
 			ID:        fmt.Sprintf("%d", i+1),
@@ -68,7 +67,6 @@ func (wp *WorkerPool) Start() error {
 		w.Start()
 	}
 
-	return nil
 }
 
 func (wp *WorkerPool) Submit(task Task) {

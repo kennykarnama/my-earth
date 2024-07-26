@@ -1,7 +1,7 @@
 package httpclient
 
 import (
-	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 )
@@ -17,7 +17,7 @@ func (s *LoggingTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 	respBytes, _ := httputil.DumpResponse(resp, true)
 	bytes = append(bytes, respBytes...)
 
-	fmt.Printf("%s\n", bytes)
+	slog.Debug("loggingTransport.round_trip", slog.Any("resp", string(bytes)))
 
 	return resp, err
 }

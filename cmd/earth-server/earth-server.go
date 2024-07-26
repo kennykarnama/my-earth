@@ -50,14 +50,15 @@ func main() {
 	log.Printf("serving http on port %s", cfg.HTTPPort)
 
 	srv := &http.Server{
-		Addr:    cfg.HTTPPort,
-		Handler: r.Handler(),
+		Addr:              cfg.HTTPPort,
+		Handler:           r.Handler(),
+		ReadHeaderTimeout: 20 * time.Second,
 	}
 
 	go func() {
 		// service connections
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			slog.Error("listen.http.server", slog.Any("err", err))
 		}
 	}()
 
@@ -68,9 +69,7 @@ func main() {
 	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal, 1)
-	// kill (no param) default send syscall.SIGTERM
-	// kill -2 is syscall.SIGINT
-	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
+
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	slog.Info("Shutdown Server ...")
@@ -79,11 +78,13 @@ func main() {
 
 	ctx2, cancel2 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel2()
+
 	if err := srv.Shutdown(ctx2); err != nil {
-		log.Fatal("Server Shutdown:", err)
+		slog.Error("Server Shutdown", slog.Any("err", err))
 	}
+
 	// catching ctx.Done(). timeout of 5 seconds.
 	<-ctx2.Done()
-	log.Println("Server exiting")
 
+	slog.Info("Server exiting")
 }

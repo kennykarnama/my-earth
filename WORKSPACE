@@ -53,8 +53,6 @@ oci_pull(
     ],
 )
 
-
-
 http_archive(
     name = "io_bazel_rules_go",
     integrity = "sha256-M6zErg9wUC20uJPJ/B3Xqb+ZjCPn/yxFF3QdQEmpdvg=",

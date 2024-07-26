@@ -26,7 +26,16 @@ func NewHttpHandler(locSvc *app.LocationSvc) *HttpHandler {
 
 func (h *HttpHandler) CreateLocation(c *gin.Context) {
 	var req genapi.CreateLocationRequest
-	c.Bind(&req)
+	err := c.Bind(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, &genapi.ErrorResponse{
+			ErrorCode:    ptr.ValueToPointer("API-400"),
+			HttpCode:     ptr.ValueToPointer(http.StatusBadRequest),
+			ErrorMessage: ptr.ValueToPointer(err.Error()),
+		})
+
+		return
+	}
 
 	loc, err := h.locSvc.SaveLoc(c.Request.Context(), &app.SaveLocReq{
 		Name: ptr.ToStr(req.Name),

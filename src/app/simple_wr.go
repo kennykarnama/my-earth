@@ -20,21 +20,22 @@ func NewSimpleWeatherRefresher(ctx context.Context, locSvc *LocationSvc, interva
 	}
 }
 
-func (s *SimpleWeatherRefresher) Watch() error {
-
+func (s *SimpleWeatherRefresher) Watch() {
 	t := time.NewTicker(s.interval)
 
 	for {
 		select {
 		case <-t.C:
 			slog.Info("refresh weather")
-			s.locSvc.RefreshWeather(s.ctx)
+			_, err := s.locSvc.RefreshWeather(s.ctx)
+			if err != nil {
+				slog.Error("refresh weather", slog.Any("err", err))
+			}
 		case <-s.ctx.Done():
 			slog.Info("refresher stopped")
 			t.Stop()
 
-			return nil
+			return
 		}
 	}
-
 }
