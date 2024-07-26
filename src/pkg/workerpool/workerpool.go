@@ -66,7 +66,6 @@ func (wp *WorkerPool) Start() {
 		}
 		w.Start()
 	}
-
 }
 
 func (wp *WorkerPool) Submit(task Task) {

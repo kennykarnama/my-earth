@@ -43,8 +43,10 @@ func (h *HttpHandler) CreateLocation(c *gin.Context) {
 		Lon:  ptr.ToFloat64(req.Longitude),
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, &genapi.GeneralRequestError{
-			Detail: err.Error(),
+		c.JSON(http.StatusInternalServerError, &genapi.ErrorResponse{
+			ErrorMessage: ptr.ValueToPointer(err.Error()),
+			ErrorCode:    ptr.ValueToPointer("API-500"),
+			HttpCode:     ptr.ValueToPointer(http.StatusInternalServerError),
 		})
 
 		return
@@ -65,8 +67,10 @@ func (h *HttpHandler) CreateLocation(c *gin.Context) {
 func (h *HttpHandler) UpdateLocationWeather(c *gin.Context) {
 	resp, err := h.locSvc.RefreshWeather(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, &genapi.GeneralRequestError{
-			Detail: err.Error(),
+		c.JSON(http.StatusInternalServerError, &genapi.ErrorResponse{
+			ErrorMessage: ptr.ValueToPointer(err.Error()),
+			ErrorCode:    ptr.ValueToPointer("API-500"),
+			HttpCode:     ptr.ValueToPointer(http.StatusInternalServerError),
 		})
 	}
 
