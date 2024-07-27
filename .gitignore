@@ -275,4 +275,4 @@ compile_commands.json
 # Ignore Bzlmod lock file until it is more stable
 MODULE.bazel.lock
 
-infra/jenkins
+infra/jenkins/conf

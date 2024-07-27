@@ -1,0 +1,61 @@
+pipeline {
+  agent any
+  stages {
+    stage('Checkout Scm') {
+      steps {
+        git(url: 'https://github.com/kennykarnama/my-earth.git', credentialsId: 'ad68d491-d9f8-4b90-9446-940b99af8a31')
+      }
+    }
+
+    stage('Shell script 0') {
+      steps {
+        withCredentials([usernamePassword(usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD', credentialsId: 'jenkins-docker-writer')]) {
+          sh '''#!/bin/bash
+
+echo "running linters"
+
+curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.59.1
+
+go install mvdan.cc/gofumpt@latest
+
+$(go env GOPATH)/bin/golangci-lint run -c .golang-ci.yaml
+
+$(go env GOPATH)/bin/gofumpt -l -w .
+
+go vet ./...'''
+        }
+
+      }
+    }
+
+    stage('Shell script 1') {
+      steps {
+        withCredentials([usernamePassword(usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD', credentialsId: 'jenkins-docker-writer')]) {
+          sh '''#!/bin/bash
+
+echo "preparing compilation"
+
+apt update && apt upgrade && apt install -y build-essential python3 docker
+
+go install github.com/bazelbuild/bazelisk@latest
+
+go install github.com/google/go-containerregistry/cmd/crane@latest
+
+export PATH=$PATH:$(go env GOPATH)/bin
+
+echo "docker login"
+
+crane auth login docker.io --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD} && bazelisk build //... && bazelisk run //cmd/earth-server:push && bazelisk run //src/infra/db/migrations:push'''
+        }
+
+      }
+    }
+
+  }
+  post {
+    always {
+      echo 'No converter for Publisher: hudson.plugins.ws_cleanup.WsCleanup'
+    }
+
+  }
+}
