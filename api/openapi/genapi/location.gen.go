@@ -4,7 +4,11 @@
 package genapi
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/oapi-codegen/runtime"
 )
 
 // CreateLocationRequest defines model for CreateLocationRequest.
@@ -42,6 +46,11 @@ type ErrorResponse struct {
 	HttpCode *int `json:"httpCode,omitempty"`
 }
 
+// FindLocationsCoordinates defines model for FindLocationsCoordinates.
+type FindLocationsCoordinates struct {
+	Items *[]Location `json:"items,omitempty"`
+}
+
 // Location defines model for Location.
 type Location struct {
 	// ID ID of location
@@ -55,6 +64,9 @@ type Location struct {
 
 	// Longitude longitude of the location
 	Longitude *float64 `json:"longitude,omitempty"`
+
+	// RefId original reference id if any
+	RefId *string `json:"ref_id,omitempty"`
 
 	// Temperature temperatur of the location
 	Temperature *float32 `json:"temperature,omitempty"`
@@ -85,6 +97,12 @@ type UpdateLocationWeatherResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// GetLocationsCoordinatesParams defines parameters for GetLocationsCoordinates.
+type GetLocationsCoordinatesParams struct {
+	// Label find by labels. Depends on the implementation
+	Label string `form:"label" json:"label"`
+}
+
 // UpdateLocationWeatherJSONBody defines parameters for UpdateLocationWeather.
 type UpdateLocationWeatherJSONBody interface{}
 
@@ -99,6 +117,9 @@ type ServerInterface interface {
 	// Create a new location
 	// (POST /locations)
 	CreateLocation(c *gin.Context)
+	// Find location coordinates
+	// (GET /locations/coordinates)
+	GetLocationsCoordinates(c *gin.Context, params GetLocationsCoordinatesParams)
 	// Update location weathers
 	// (POST /locations/weathers)
 	UpdateLocationWeather(c *gin.Context)
@@ -124,6 +145,39 @@ func (siw *ServerInterfaceWrapper) CreateLocation(c *gin.Context) {
 	}
 
 	siw.Handler.CreateLocation(c)
+}
+
+// GetLocationsCoordinates operation middleware
+func (siw *ServerInterfaceWrapper) GetLocationsCoordinates(c *gin.Context) {
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetLocationsCoordinatesParams
+
+	// ------------- Required query parameter "label" -------------
+
+	if paramValue := c.Query("label"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandler(c, fmt.Errorf("Query argument label is required, but not found"), http.StatusBadRequest)
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "label", c.Request.URL.Query(), &params.Label)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter label: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.GetLocationsCoordinates(c, params)
 }
 
 // UpdateLocationWeather operation middleware
@@ -167,5 +221,6 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	}
 
 	router.POST(options.BaseURL+"/locations", wrapper.CreateLocation)
+	router.GET(options.BaseURL+"/locations/coordinates", wrapper.GetLocationsCoordinates)
 	router.POST(options.BaseURL+"/locations/weathers", wrapper.UpdateLocationWeather)
 }

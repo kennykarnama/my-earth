@@ -92,6 +92,12 @@ def go_dependencies():
         version = "v1.1.0",
     )
     go_repository(
+        name = "com_github_flopp_go_coordsparser",
+        importpath = "github.com/flopp/go-coordsparser",
+        sum = "h1:ZYEbOgGPFGLZwkLxRjV9zxZAIR1lExrNfFnObG/peek=",
+        version = "v0.0.0-20240403152942-4891dc40d0a7",
+    )
+    go_repository(
         name = "com_github_flosch_pongo2_v4",
         importpath = "github.com/flosch/pongo2/v4",
         sum = "h1:gv+5Pe3vaSVmiJvh/BZa82b7/00YUGm0PIyVVLop0Hw=",

@@ -12,6 +12,7 @@ go_library(
         "//api/openapi/genapi",
         "//src/adapter/db",
         "//src/domain",
+        "//src/pkg/coord",
         "//src/pkg/psql",
         "//src/pkg/ptr",
         "@com_github_exaring_otelpgx//:otelpgx",

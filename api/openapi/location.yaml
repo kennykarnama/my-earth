@@ -31,6 +31,29 @@ paths:
           application/json:
            schema:
             $ref: '#/components/schemas/ErrorResponse'
+  /locations/coordinates:
+   get:
+    summary: Find location coordinates
+    parameters:
+      - in: query
+        schema:
+         type: string
+        required: true
+        name: label
+        description: find by labels. Depends on the implementation
+    responses: 
+     '200':
+      description: matches items
+      content:
+        application/json:
+         schema:
+          $ref: '#/components/schemas/FindLocationsCoordinates'
+     default:
+      description: error happens
+      content:
+        application/json:
+         schema:
+          $ref: '#/components/schemas/ErrorResponse'
   /locations/weathers:
    post:
      summary: Update location weathers
@@ -91,6 +114,16 @@ components:
       wind_direction:
        type: string
        description: direction of wind
+      ref_id:
+       type: string
+       description: original reference id if any
+   FindLocationsCoordinates:
+    type: object
+    properties:
+      items:
+       type: array
+       items:
+        $ref: '#/components/schemas/Location'
    CreateLocationRequest:
     type: object
     properties:

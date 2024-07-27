@@ -38,7 +38,7 @@ func main() {
 	wp := workerpool.New(10)
 	wp.Start()
 
-	locSvc := app.NewLocationSvc(locRepo, meteoSourceRepo, wp)
+	locSvc := app.NewLocationSvc(locRepo, meteoSourceRepo, meteoSourceRepo, wp)
 	weatherRefresher := app.NewSimpleWeatherRefresher(ctx, locSvc, 1*time.Second)
 
 	locHandler := port.NewHttpHandler(locSvc)

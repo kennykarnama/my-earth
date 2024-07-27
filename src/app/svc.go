@@ -12,15 +12,20 @@ import (
 
 type LocationSvc struct {
 	repo        domain.LocationRepository
+	qrepo       domain.LocationQuery
 	weatherRepo domain.WeatherRepository
 	workerPool  *workerpool.WorkerPool
 }
 
-func NewLocationSvc(repo domain.LocationRepository, weatherRepo domain.WeatherRepository, wp *workerpool.WorkerPool) *LocationSvc {
+func NewLocationSvc(repo domain.LocationRepository,
+	locQueryRepo domain.LocationQuery,
+	weatherRepo domain.WeatherRepository,
+	wp *workerpool.WorkerPool) *LocationSvc {
 	return &LocationSvc{
 		repo:        repo,
 		weatherRepo: weatherRepo,
 		workerPool:  wp,
+		qrepo:       locQueryRepo,
 	}
 }
 
@@ -97,5 +102,20 @@ func (l *LocationSvc) RefreshWeather(ctx context.Context) (*RefreshWeatherResp, 
 
 	return &RefreshWeatherResp{
 		NumUpdated: len(locs),
+	}, nil
+}
+
+type FindLocationsCoordinatesResp struct {
+	Matches *domain.ListLocations
+}
+
+func (l *LocationSvc) FindLocationsCoordinates(ctx context.Context, q string) (*FindLocationsCoordinatesResp, error) {
+	matches, err := l.qrepo.FindLocationPoint(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	return &FindLocationsCoordinatesResp{
+		Matches: matches,
 	}, nil
 }

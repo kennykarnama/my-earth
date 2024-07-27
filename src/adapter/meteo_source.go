@@ -10,6 +10,7 @@ import (
 
 	"github.com/kennykarnama/my-earth/api/openapi/genapi"
 	"github.com/kennykarnama/my-earth/src/domain"
+	"github.com/kennykarnama/my-earth/src/pkg/coord"
 	"github.com/kennykarnama/my-earth/src/pkg/ptr"
 )
 
@@ -126,4 +127,72 @@ func (m *MeteoSource) FindByPoint(ctx context.Context, lat, lon float64) (*domai
 	}
 
 	return &w, nil
+}
+
+func (m MeteoSource) FindLocationPoint(ctx context.Context, name string) (*domain.ListLocations, error) {
+	en := genapi.En
+	resp, err := m.cli.FindPlacesFindPlacesGetWithResponse(ctx, &genapi.FindPlacesFindPlacesGetParams{
+		Text:     name,
+		Language: &en,
+		Key:      ptr.ValueToPointer(m.apiKey),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("meteoSource.findLocationPoint err: %w", err)
+	}
+
+	if resp == nil {
+		return nil, fmt.Errorf("meteSource.findLocationPoint err: empty resp")
+	}
+
+	if resp.JSON400 != nil {
+		return nil, &ErrGeneralMeteoSource{*resp.JSON400, http.StatusBadRequest}
+	}
+
+	if resp.JSON402 != nil {
+		return nil, &ErrGeneralMeteoSource{*resp.JSON402, 402}
+	}
+
+	if resp.JSON403 != nil {
+		return nil, &ErrGeneralMeteoSource{*resp.JSON403, http.StatusForbidden}
+	}
+
+	if resp.JSON422 != nil {
+		return nil, &ErrHttpValidationMeteoSource{*resp.JSON422, http.StatusUnprocessableEntity}
+	}
+
+	if resp.JSON429 != nil {
+		return nil, &ErrGeneralMeteoSource{*resp.JSON429, 429}
+	}
+
+	if resp.JSON200 == nil {
+		return nil, fmt.Errorf("meteoSource.findLocationPoint err: empty response")
+	}
+
+	listMatches := &domain.ListLocations{
+		Items: []domain.Location{},
+	}
+
+	for _, pl := range *resp.JSON200 {
+
+		lat, err := coord.NewLatLong(ptr.ToStr(pl.Lat))
+		if err != nil {
+			return nil, fmt.Errorf("meteoSource.findLocationPoint err: %w, failed parsing lat value: %v", err, *pl.Lat)
+		}
+		lon, err := coord.NewLatLong(ptr.ToStr(pl.Lon))
+		if err != nil {
+			return nil, fmt.Errorf("meteoSource.findLocationPoint err: %w failed parsing lon value: %v", err, *pl.Lon)
+		}
+
+		flat := float64(lat)
+		flon := float64(lon)
+
+		listMatches.Items = append(listMatches.Items, domain.Location{
+			Name:  ptr.ToStr(pl.Name),
+			Lat:   flat,
+			Lon:   flon,
+			RefID: ptr.ToStr(pl.PlaceId),
+		})
+	}
+
+	return listMatches, nil
 }

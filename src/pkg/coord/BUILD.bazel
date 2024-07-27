@@ -1,0 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "coord",
+    srcs = ["coord.go"],
+    importpath = "github.com/kennykarnama/my-earth/src/pkg/coord",
+    visibility = ["//visibility:public"],
+)

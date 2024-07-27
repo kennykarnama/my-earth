@@ -81,3 +81,35 @@ func (h *HttpHandler) UpdateLocationWeather(c *gin.Context) {
 		Status: ptr.ValueToPointer(SuccessStatus),
 	})
 }
+
+func (h *HttpHandler) GetLocationsCoordinates(c *gin.Context, params genapi.GetLocationsCoordinatesParams) {
+	matches, err := h.locSvc.FindLocationsCoordinates(c.Request.Context(), params.Label)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, &genapi.ErrorResponse{
+			HttpCode:     ptr.ValueToPointer(http.StatusInternalServerError),
+			ErrorCode:    ptr.ValueToPointer("API-500"),
+			ErrorMessage: ptr.ValueToPointer(err.Error()),
+		})
+
+		return
+	}
+
+	var respMatches []genapi.Location
+
+	resp := &genapi.FindLocationsCoordinates{
+		Items: &[]genapi.Location{},
+	}
+
+	for _, m := range matches.Matches.Items {
+		respMatches = append(respMatches, genapi.Location{
+			City:      &m.Name,
+			Latitude:  &m.Lat,
+			Longitude: &m.Lon,
+			RefId:     &m.RefID,
+		})
+	}
+
+	resp.Items = &respMatches
+
+	c.JSON(http.StatusOK, resp)
+}
