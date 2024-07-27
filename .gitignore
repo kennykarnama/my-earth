@@ -219,7 +219,6 @@ php/ext/google/protobuf/configure.in
 php/ext/google/protobuf/mkinstalldirs
 php/ext/google/protobuf/run-tests.php
 php/ext/google/protobuf/third_party/
-vendor/
 
 # Ignore the bazel symlinks
 /bazel-*
