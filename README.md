@@ -8,11 +8,20 @@ Simple application to provide locations' weather
 
 We use bazel as the build system. 
 
-- Install bazelisk 
+- Install bazelisk
+- Install bazel dependencies
+  - python3
+  - cclang toolchains, just to be safe, please install build-essentials
 - Run bazel commands
 
 ```
 bazelisk build //...
+```
+
+Run earth-server
+
+```
+bazelisk run //cmd/earth-server:earth-server
 ```
 
 Running bazelisk build will create binary of each of go package.
