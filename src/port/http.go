@@ -38,9 +38,9 @@ func (h *HttpHandler) CreateLocation(c *gin.Context) {
 	}
 
 	loc, err := h.locSvc.SaveLoc(c.Request.Context(), &app.SaveLocReq{
-		Name: ptr.ToStr(req.Name),
-		Lat:  ptr.ToFloat64(req.Latitude),
-		Lon:  ptr.ToFloat64(req.Longitude),
+		Name: req.Name,
+		Lat:  req.Latitude,
+		Lon:  req.Longitude,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, &genapi.ErrorResponse{

@@ -126,6 +126,10 @@ components:
         $ref: '#/components/schemas/Location'
    CreateLocationRequest:
     type: object
+    required:
+      - name
+      - latitude
+      - longitude
     properties:
       name:
        type: string

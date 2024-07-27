@@ -14,13 +14,13 @@ import (
 // CreateLocationRequest defines model for CreateLocationRequest.
 type CreateLocationRequest struct {
 	// Latitude latitude of the location
-	Latitude *float64 `json:"latitude,omitempty"`
+	Latitude float64 `json:"latitude"`
 
 	// Longitude longitude of the location
-	Longitude *float64 `json:"longitude,omitempty"`
+	Longitude float64 `json:"longitude"`
 
 	// Name location name
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 }
 
 // CreateLocationResponse defines model for CreateLocationResponse.
