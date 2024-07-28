@@ -90,7 +90,6 @@ _oapi_codegen_gen = rule(
     },
 )
 
-# 前の oapi_codegen を _oapi_codegen にリネーム
 def oapi_codegen(name, **kwargs):
     _oapi_codegen(name = name, **kwargs)
     _oapi_codegen_gen(name = name + "_gen", **kwargs)
