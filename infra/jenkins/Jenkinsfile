@@ -1,13 +1,22 @@
 pipeline {
   agent any
+  
+  tools {
+    go 'go 1.22.4'
+  }
+  
   stages {
     stage('Checkout Scm') {
       steps {
-        git(url: 'https://github.com/kennykarnama/my-earth.git', credentialsId: 'ad68d491-d9f8-4b90-9446-940b99af8a31')
+        script {
+          git branch: 'main',
+          credentialsId: 'ad68d491-d9f8-4b90-9446-940b99af8a31',
+          url: 'https://github.com/kennykarnama/my-earth.git'
+        }
       }
     }
 
-    stage('Shell script 0') {
+    stage('Linting') {
       steps {
         withCredentials([usernamePassword(usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD', credentialsId: 'jenkins-docker-writer')]) {
           sh '''#!/bin/bash
@@ -28,7 +37,7 @@ go vet ./...'''
       }
     }
 
-    stage('Shell script 1') {
+    stage('Compile and Push Images') {
       steps {
         withCredentials([usernamePassword(usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD', credentialsId: 'jenkins-docker-writer')]) {
           sh '''#!/bin/bash
@@ -49,12 +58,6 @@ crane auth login docker.io --username ${DOCKER_USERNAME} --password ${DOCKER_PAS
         }
 
       }
-    }
-
-  }
-  post {
-    always {
-      echo 'No converter for Publisher: hudson.plugins.ws_cleanup.WsCleanup'
     }
 
   }
