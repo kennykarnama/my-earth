@@ -40,3 +40,15 @@ bazelisk run //cmd/earth-server:push
 ```
 bazelisk run //src/infra/db/migrations:push 
 ```
+
+### Start in local
+
+We have docker compose, 
+
+just run
+
+```
+cd infra && docker compose up -d
+```
+
+Rest API will be served in port = 8080
