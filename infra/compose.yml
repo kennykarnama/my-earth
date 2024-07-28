@@ -1,6 +1,6 @@
 services:
   my-earth:
-   image: earth-server:latest
+   image: kennykarnama/earth-server:latest
    deploy:
      resources:
        limits:
@@ -10,9 +10,11 @@ services:
      - "8080:8080"
    depends_on:
     migrator:
-        condition: service_completed_successfully
+      condition: service_completed_successfully
+    rcli:
+      condition: service_completed_successfully
   migrator:
-   image: earth-migrator:latest
+   image: kennykarnama/earth-migrator:latest
    deploy:
      resources:
        limits:
@@ -70,3 +72,9 @@ services:
      - ./.volumes/redis:/data
    environment:
     - "6379:6379"
+  rcli:
+   image: redis:latest
+   links:
+    - redis
+   command: >
+     sh -c 'redis-cli -h redis FT.CREATE locations:points:q:matches:idx ON HASH PREFIX 1 "locations:points:data:" SCHEMA ref_id TEXT name TEXT lat NUMERIC lon NUMERIC'
