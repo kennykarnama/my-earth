@@ -1,6 +1,6 @@
 ## my-earth
 
-Simple application to provide locations' weather
+Simple application to provide locations' weather. Currently use MeteoSource as the data provider.
 
 ## Local development
 
