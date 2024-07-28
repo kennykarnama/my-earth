@@ -276,3 +276,4 @@ compile_commands.json
 MODULE.bazel.lock
 
 infra/jenkins/conf
+infra/.volumes/

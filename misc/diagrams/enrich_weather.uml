@@ -1,0 +1,23 @@
+@startuml
+
+skin rose
+
+cron -> psql: Get all expired data (expired_at < now())
+
+psql -> cron: list of expired locations
+
+loop len(items) times
+        cron ->> WorkerPool: SubmitJob
+end
+
+loop x times
+        worker -> WorkerPool: Get Jobs
+        WorkerPool -> worker: Job
+        worker->meteosource: Find weather by lat lon
+        meteosource->worker: weather info
+        worker->psql: update
+        psql->worker: update status
+end
+
+
+@enduml
