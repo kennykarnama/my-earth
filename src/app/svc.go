@@ -120,3 +120,27 @@ func (l *LocationSvc) FindLocationsCoordinates(ctx context.Context, q string) (*
 		Matches: matches,
 	}, nil
 }
+
+type ListLocationsQuery struct {
+	City *string
+	ID   *int32
+}
+
+type ListLocationsResp struct {
+	Locations []domain.LocationWeather
+}
+
+func (l *LocationSvc) ListLocations(ctx context.Context, q ListLocationsQuery) (*ListLocationsResp, error) {
+	res, err := l.repo.ListLocations(ctx, domain.ListLocationsQuery{
+		City: q.City,
+		ID:   q.ID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &ListLocationsResp{
+		Locations: res,
+	}, nil
+}

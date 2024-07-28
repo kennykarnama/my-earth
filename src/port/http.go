@@ -54,7 +54,7 @@ func (h *HttpHandler) CreateLocation(c *gin.Context) {
 
 	c.JSON(200, &genapi.CreateLocationResponse{
 		Data: &genapi.Location{
-			ID:        ptr.ValueToPointer(int(loc.Loc.ID)),
+			ID:        ptr.ValueToPointer(loc.Loc.ID),
 			City:      ptr.ValueToPointer(loc.Loc.Name),
 			Latitude:  ptr.ValueToPointer(loc.Loc.Lat),
 			Longitude: ptr.ValueToPointer(loc.Loc.Lon),
@@ -110,6 +110,54 @@ func (h *HttpHandler) GetLocationsCoordinates(c *gin.Context, params genapi.GetL
 	}
 
 	resp.Items = &respMatches
+
+	c.JSON(http.StatusOK, resp)
+}
+
+func (h *HttpHandler) ListLocationsEitherProvideIdOrName(c *gin.Context, params genapi.ListLocationsEitherProvideIdOrNameParams) {
+	if params.City == nil && params.Id == nil {
+		c.JSON(http.StatusBadRequest, &genapi.ErrorResponse{
+			ErrorCode:    ptr.ValueToPointer("API-400"),
+			ErrorMessage: ptr.ValueToPointer("either provide id or city"),
+			HttpCode:     ptr.ValueToPointer(http.StatusBadRequest),
+		})
+
+		return
+	}
+
+	res, err := h.locSvc.ListLocations(c.Request.Context(), app.ListLocationsQuery{
+		City: params.City,
+		ID:   params.Id,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, &genapi.ErrorResponse{
+			ErrorCode:    ptr.ValueToPointer("API-500"),
+			ErrorMessage: ptr.ValueToPointer(err.Error()),
+			HttpCode:     ptr.ValueToPointer(http.StatusInternalServerError),
+		})
+	}
+
+	resp := &genapi.ListLocations{
+		Items: &[]genapi.Location{},
+	}
+
+	var apiLocs []genapi.Location
+
+	for _, m := range res.Locations {
+		apiLocs = append(apiLocs, genapi.Location{
+			ID:             &m.ID,
+			City:           &m.Name,
+			Latitude:       &m.Lat,
+			Longitude:      &m.Lon,
+			Temperature:    &m.Temperature.Value,
+			WeatherSummary: &m.Weather.Summary,
+			WindAngle:      &m.WindAngle,
+			WindDirection:  &m.WindDirection,
+			WindSpeed:      &m.WindSpeed,
+		})
+	}
+
+	resp.Items = &apiLocs
 
 	c.JSON(http.StatusOK, resp)
 }

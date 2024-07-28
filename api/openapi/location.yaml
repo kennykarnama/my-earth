@@ -31,6 +31,36 @@ paths:
           application/json:
            schema:
             $ref: '#/components/schemas/ErrorResponse'
+   get:
+    summary: list locations
+    operationId: list locations. Either provide id or name
+    tags:
+      - listLocations
+    parameters:
+      - in: query
+        name: id
+        description: id of the location
+        schema: 
+         type: integer
+         format: int32
+      - in: query
+        name: city
+        description: name of the city
+        schema:
+         type: string
+    responses:
+      '200':
+       description: list of locations
+       content:
+         application/json:
+          schema:
+           $ref: '#/components/schemas/ListLocations'
+      default:
+       description: when something goes wrong
+       content:
+         application/json:
+          schema:
+           $ref: '#/components/schemas/ErrorResponse'
   /locations/coordinates:
    get:
     summary: Find location coordinates
@@ -84,6 +114,7 @@ components:
     properties:
       ID:
        type: integer
+       format: int32
        description: ID of location
       city:
        type: string
@@ -168,6 +199,13 @@ components:
           numUpdated:
            type: integer
            default: 0
+   ListLocations:
+    type: object
+    properties:
+      items:
+       type: array
+       items:
+        $ref: '#/components/schemas/Location'
    ErrorResponse:
     type: object
     properties:

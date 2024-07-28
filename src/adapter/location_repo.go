@@ -225,3 +225,61 @@ func (l *LocationRepo) GetExpiringWeather(ctx context.Context) ([]domain.Locatio
 
 	return locs, nil
 }
+
+func (l *LocationRepo) ListLocations(ctx context.Context, q domain.ListLocationsQuery) ([]domain.LocationWeather, error) {
+	tx, err := l.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("location.list failed to begin transaction: %w", err)
+	}
+
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+			slog.Error("listLocations", slog.String("err", err.Error()))
+		}
+	}()
+
+	ptx := l.q.WithTx(tx)
+
+	var dbLocations []db.MyEarthLocation
+
+	if q.ID != nil {
+		dbLocation, err := ptx.GetLocationByID(ctx, *q.ID)
+		if err != nil {
+			return nil, fmt.Errorf("location.list failed to begin transaction: %w", err)
+		}
+
+		dbLocations = append(dbLocations, dbLocation)
+	} else if q.City != nil {
+		dbLocations, err = ptx.GetLocationByName(ctx, *q.City)
+		if err != nil {
+			return nil, fmt.Errorf("location.list err: %w", err)
+		}
+	}
+
+	var locs []domain.LocationWeather
+
+	for _, dbLoc := range dbLocations {
+		locs = append(locs, domain.LocationWeather{
+			Location: domain.Location{
+				ID:        dbLoc.ID,
+				Name:      dbLoc.City,
+				Lat:       dbLoc.Latitude.Float64,
+				Lon:       dbLoc.Longitude.Float64,
+				CreatedAt: psql.PGTimestampzToTimestamp(dbLoc.CreatedAt),
+				UpdatedAt: psql.PGTimestampzToTimestamp(dbLoc.UpdatedAt),
+			},
+			Weather: domain.Weather{
+				Summary: psql.PGTextToString(dbLoc.WeatherSummary),
+				Temperature: domain.Temperature{
+					Unit:  psql.PGTextToString(dbLoc.TemperatureUnit),
+					Value: dbLoc.Temperature.Float32,
+				},
+				WindSpeed:     dbLoc.WindSpeed.Float32,
+				WindAngle:     dbLoc.WindAngle.Float32,
+				WindDirection: psql.PGTextToString(dbLoc.WindDirection),
+			},
+		})
+	}
+
+	return locs, nil
+}

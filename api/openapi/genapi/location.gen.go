@@ -51,10 +51,15 @@ type FindLocationsCoordinates struct {
 	Items *[]Location `json:"items,omitempty"`
 }
 
+// ListLocations defines model for ListLocations.
+type ListLocations struct {
+	Items *[]Location `json:"items,omitempty"`
+}
+
 // Location defines model for Location.
 type Location struct {
 	// ID ID of location
-	ID *int `json:"ID,omitempty"`
+	ID *int32 `json:"ID,omitempty"`
 
 	// City location name
 	City *string `json:"city,omitempty"`
@@ -97,6 +102,15 @@ type UpdateLocationWeatherResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// ListLocationsEitherProvideIdOrNameParams defines parameters for ListLocationsEitherProvideIdOrName.
+type ListLocationsEitherProvideIdOrNameParams struct {
+	// Id id of the location
+	Id *int32 `form:"id,omitempty" json:"id,omitempty"`
+
+	// City name of the city
+	City *string `form:"city,omitempty" json:"city,omitempty"`
+}
+
 // GetLocationsCoordinatesParams defines parameters for GetLocationsCoordinates.
 type GetLocationsCoordinatesParams struct {
 	// Label find by labels. Depends on the implementation
@@ -114,6 +128,9 @@ type UpdateLocationWeatherJSONRequestBody UpdateLocationWeatherJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// list locations
+	// (GET /locations)
+	ListLocationsEitherProvideIdOrName(c *gin.Context, params ListLocationsEitherProvideIdOrNameParams)
 	// Create a new location
 	// (POST /locations)
 	CreateLocation(c *gin.Context)
@@ -133,6 +150,40 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(c *gin.Context)
+
+// ListLocationsEitherProvideIdOrName operation middleware
+func (siw *ServerInterfaceWrapper) ListLocationsEitherProvideIdOrName(c *gin.Context) {
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListLocationsEitherProvideIdOrNameParams
+
+	// ------------- Optional query parameter "id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "id", c.Request.URL.Query(), &params.Id)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	// ------------- Optional query parameter "city" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "city", c.Request.URL.Query(), &params.City)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter city: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.ListLocationsEitherProvideIdOrName(c, params)
+}
 
 // CreateLocation operation middleware
 func (siw *ServerInterfaceWrapper) CreateLocation(c *gin.Context) {
@@ -220,6 +271,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
+	router.GET(options.BaseURL+"/locations", wrapper.ListLocationsEitherProvideIdOrName)
 	router.POST(options.BaseURL+"/locations", wrapper.CreateLocation)
 	router.GET(options.BaseURL+"/locations/coordinates", wrapper.GetLocationsCoordinates)
 	router.POST(options.BaseURL+"/locations/weathers", wrapper.UpdateLocationWeather)

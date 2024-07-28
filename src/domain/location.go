@@ -21,11 +21,17 @@ type LocationWeather struct {
 	Weather
 }
 
+type ListLocationsQuery struct {
+	City *string
+	ID   *int32
+}
+
 type LocationRepository interface {
 	SaveLoc(ctx context.Context, loc *Location) error
 	GetLocDetailByID(ctx context.Context, ID int) (*LocationWeather, error)
 	UpdateWeather(ctx context.Context, locID int, w *Weather) error
 	GetExpiringWeather(ctx context.Context) ([]LocationWeather, error)
+	ListLocations(ctx context.Context, q ListLocationsQuery) ([]LocationWeather, error)
 }
 
 type ListLocations struct {

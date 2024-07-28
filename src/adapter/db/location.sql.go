@@ -99,6 +99,46 @@ func (q *Queries) GetLocationByID(ctx context.Context, id int32) (MyEarthLocatio
 	return i, err
 }
 
+const getLocationByName = `-- name: GetLocationByName :many
+SELECT id, city, weather_summary, temperature, wind_speed, wind_angle, wind_direction, latitude, longitude, created_at, updated_at, deleted_at, expired_at, temperature_unit FROM my_earth.location 
+ WHERE city LIKE $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) GetLocationByName(ctx context.Context, city string) ([]MyEarthLocation, error) {
+	rows, err := q.db.Query(ctx, getLocationByName, city)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []MyEarthLocation
+	for rows.Next() {
+		var i MyEarthLocation
+		if err := rows.Scan(
+			&i.ID,
+			&i.City,
+			&i.WeatherSummary,
+			&i.Temperature,
+			&i.WindSpeed,
+			&i.WindAngle,
+			&i.WindDirection,
+			&i.Latitude,
+			&i.Longitude,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.ExpiredAt,
+			&i.TemperatureUnit,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const selectAllLocations = `-- name: SelectAllLocations :many
 SELECT id, city, weather_summary, temperature, wind_speed, wind_angle, wind_direction, latitude, longitude, created_at, updated_at, deleted_at, expired_at, temperature_unit FROM my_earth.location WHERE location.deleted_at IS NULL
 `

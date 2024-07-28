@@ -21,3 +21,7 @@ SELECT * FROM my_earth.location
 WHERE location.deleted_at IS NULL 
 AND (location.expired_at IS NULL OR location.expired_at < $1)
 ORDER BY location.expired_at;
+
+-- name: GetLocationByName :many
+SELECT * FROM my_earth.location 
+ WHERE city LIKE $1 AND deleted_at IS NULL;
