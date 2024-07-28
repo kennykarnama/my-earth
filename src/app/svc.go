@@ -20,7 +20,8 @@ type LocationSvc struct {
 func NewLocationSvc(repo domain.LocationRepository,
 	locQueryRepo domain.LocationQuery,
 	weatherRepo domain.WeatherRepository,
-	wp *workerpool.WorkerPool) *LocationSvc {
+	wp *workerpool.WorkerPool,
+) *LocationSvc {
 	return &LocationSvc{
 		repo:        repo,
 		weatherRepo: weatherRepo,

@@ -34,12 +34,13 @@ func main() {
 	}
 
 	meteoSourceRepo := adapter.NewMeteoSource(meteoSourceCli, cfg.MeteoSourceAPIKey)
+	locQueryRepo := adapter.NewRedisCached(meteoSourceRepo, cfg.RedisAddr)
 
 	wp := workerpool.New(10)
 	wp.Start()
 
-	locSvc := app.NewLocationSvc(locRepo, meteoSourceRepo, meteoSourceRepo, wp)
-	weatherRefresher := app.NewSimpleWeatherRefresher(ctx, locSvc, 1*time.Second)
+	locSvc := app.NewLocationSvc(locRepo, locQueryRepo, meteoSourceRepo, wp)
+	weatherRefresher := app.NewSimpleWeatherRefresher(ctx, locSvc, 60*time.Second)
 
 	locHandler := port.NewHttpHandler(locSvc)
 

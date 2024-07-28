@@ -194,5 +194,22 @@ func (m MeteoSource) FindLocationPoint(ctx context.Context, name string) (*domai
 		})
 	}
 
+	// find header expirations
+	headers := resp.HTTPResponse.Header
+	for hk, hv := range headers {
+		if hk == "Expires" {
+			if len(hv) == 0 {
+				return nil, fmt.Errorf("meteoSource.findLocationPoint err: %w", fmt.Errorf("missing expires header"))
+			}
+
+			log.Println("found expires header with value", hv[0])
+
+			err = listMatches.SetExpiredAt(hv[0], time.RFC1123)
+			if err != nil {
+				return nil, fmt.Errorf("findByPoint err: %w", err)
+			}
+		}
+	}
+
 	return listMatches, nil
 }

@@ -3,6 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "adapter",
     srcs = [
+        "cached_repo.go",
         "location_repo.go",
         "meteo_source.go",
     ],
@@ -20,5 +21,6 @@ go_library(
         "@com_github_jackc_pgx_v5//pgxpool",
         "@com_github_jackc_pgx_v5//tracelog",
         "@com_github_mcosta74_pgx_slog//:pgx-slog",
+        "@com_github_redis_rueidis//:rueidis",
     ],
 )

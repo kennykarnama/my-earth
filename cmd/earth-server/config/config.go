@@ -8,6 +8,7 @@ type Spec struct {
 	DSN                string `envconfig:"DSN" required:"true"`
 	MeteoSourceBaseURL string `envconfig:"METEO_SOURCE_BASE_URL" default:"https://www.meteosource.com/api/v1/free"`
 	MeteoSourceAPIKey  string `envconfig:"METEO_SOURCE_API_KEY" required:"true"`
+	RedisAddr          string `envconfig:"REDIS_ADDR" required:"true"`
 }
 
 func Get() Spec {

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"time"
 )
 
@@ -28,8 +29,32 @@ type LocationRepository interface {
 }
 
 type ListLocations struct {
-	Items []Location
+	Items     []Location
+	expiredAt time.Time
+	tz        string
 }
+
+func (l *ListLocations) SetExpiredAt(s string, layout string) error {
+	expiredAt, err := time.Parse(layout, s)
+	if err != nil {
+		return fmt.Errorf("weather.setExpiredAt err: %w", err)
+	}
+
+	l.expiredAt = expiredAt
+
+	l.tz, _ = expiredAt.Zone()
+
+	return nil
+}
+
+func (l *ListLocations) ExpiredAt() time.Time {
+	return l.expiredAt
+}
+
+func (l *ListLocations) ExpiredAtUTC() time.Time {
+	return l.expiredAt.UTC()
+}
+
 type LocationQuery interface {
 	FindLocationPoint(ctx context.Context, name string) (*ListLocations, error)
 }
