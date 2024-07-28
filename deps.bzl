@@ -230,6 +230,12 @@ def go_dependencies():
         version = "v0.0.0-20150926172116-812a484cc733",
     )
     go_repository(
+        name = "com_github_jackc_pgerrcode",
+        importpath = "github.com/jackc/pgerrcode",
+        sum = "h1:Dj0L5fhJ9F82ZJyVOmBx6msDp/kfd1t9GRfny/mfJA0=",
+        version = "v0.0.0-20240316143900-6e2875d9b438",
+    )
+    go_repository(
         name = "com_github_jackc_pgpassfile",
         importpath = "github.com/jackc/pgpassfile",
         sum = "h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=",

@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "err",
+    srcs = ["err.go"],
+    importpath = "github.com/kennykarnama/my-earth/src/pkg/err",
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "generr",
+    srcs = ["err.go"],
+    importpath = "github.com/kennykarnama/my-earth/src/pkg/generr",
+    visibility = ["//visibility:public"],
+)

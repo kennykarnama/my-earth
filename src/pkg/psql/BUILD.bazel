@@ -4,12 +4,15 @@ go_library(
     name = "psql",
     srcs = [
         "converter.go",
+        "pgerr.go",
         "pgx_tracer.go",
     ],
     importpath = "github.com/kennykarnama/my-earth/src/pkg/psql",
     visibility = ["//visibility:public"],
     deps = [
+        "@com_github_jackc_pgerrcode//:pgerrcode",
         "@com_github_jackc_pgx_v5//:pgx",
+        "@com_github_jackc_pgx_v5//pgconn",
         "@com_github_jackc_pgx_v5//pgtype",
     ],
 )

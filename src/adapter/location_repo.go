@@ -15,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/tracelog"
 	"github.com/kennykarnama/my-earth/src/adapter/db"
 	"github.com/kennykarnama/my-earth/src/domain"
+	"github.com/kennykarnama/my-earth/src/pkg/generr"
 	"github.com/kennykarnama/my-earth/src/pkg/psql"
 	pgxlog "github.com/mcosta74/pgx-slog"
 )
@@ -87,6 +88,10 @@ func (l *LocationRepo) SaveLoc(ctx context.Context, loc *domain.Location) error 
 		UpdatedAt: psql.TimeToPGTimestampz(loc.CreatedAt),
 	})
 	if err != nil {
+		if psql.IsUniqueViolationErr(err) {
+			return generr.NewDuplicateErr(err.Error())
+		}
+
 		return fmt.Errorf("location.save err: %w", err)
 	}
 
@@ -245,6 +250,10 @@ func (l *LocationRepo) ListLocations(ctx context.Context, q domain.ListLocations
 	if q.ID != nil {
 		dbLocation, err := ptx.GetLocationByID(ctx, *q.ID)
 		if err != nil {
+			if psql.NoRowsErr(err) {
+				return []domain.LocationWeather{}, nil
+			}
+
 			return nil, fmt.Errorf("location.list failed to begin transaction: %w", err)
 		}
 

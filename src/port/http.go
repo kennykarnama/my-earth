@@ -43,11 +43,7 @@ func (h *HttpHandler) CreateLocation(c *gin.Context) {
 		Lon:  req.Longitude,
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, &genapi.ErrorResponse{
-			ErrorMessage: ptr.ValueToPointer(err.Error()),
-			ErrorCode:    ptr.ValueToPointer("API-500"),
-			HttpCode:     ptr.ValueToPointer(http.StatusInternalServerError),
-		})
+		GenErrToAPIErr(err, c)
 
 		return
 	}
@@ -67,11 +63,7 @@ func (h *HttpHandler) CreateLocation(c *gin.Context) {
 func (h *HttpHandler) UpdateLocationWeather(c *gin.Context) {
 	resp, err := h.locSvc.RefreshWeather(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, &genapi.ErrorResponse{
-			ErrorMessage: ptr.ValueToPointer(err.Error()),
-			ErrorCode:    ptr.ValueToPointer("API-500"),
-			HttpCode:     ptr.ValueToPointer(http.StatusInternalServerError),
-		})
+		GenErrToAPIErr(err, c)
 	}
 
 	c.JSON(http.StatusOK, &genapi.UpdateLocationWeatherResponse{
@@ -85,11 +77,7 @@ func (h *HttpHandler) UpdateLocationWeather(c *gin.Context) {
 func (h *HttpHandler) GetLocationsCoordinates(c *gin.Context, params genapi.GetLocationsCoordinatesParams) {
 	matches, err := h.locSvc.FindLocationsCoordinates(c.Request.Context(), params.Label)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, &genapi.ErrorResponse{
-			HttpCode:     ptr.ValueToPointer(http.StatusInternalServerError),
-			ErrorCode:    ptr.ValueToPointer("API-500"),
-			ErrorMessage: ptr.ValueToPointer(err.Error()),
-		})
+		GenErrToAPIErr(err, c)
 
 		return
 	}
@@ -130,11 +118,9 @@ func (h *HttpHandler) ListLocationsEitherProvideIdOrName(c *gin.Context, params 
 		ID:   params.Id,
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, &genapi.ErrorResponse{
-			ErrorCode:    ptr.ValueToPointer("API-500"),
-			ErrorMessage: ptr.ValueToPointer(err.Error()),
-			HttpCode:     ptr.ValueToPointer(http.StatusInternalServerError),
-		})
+		GenErrToAPIErr(err, c)
+
+		return
 	}
 
 	resp := &genapi.ListLocations{
